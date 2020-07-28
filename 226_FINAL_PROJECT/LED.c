@@ -38,6 +38,7 @@ void RBG_LED_init(){
           P1->IE   |= BIT6; //enable interrupt on P1.7
           P1->IFG   = 0; //clear all interrupt flags on port 1
 
+
 }
 //FUNCTION THAT CONTROLS THE BRIGHTNESS OF THE BLUE LED, GIVEN AN INPUT FOR THE DUTY CYCLE TO BE INPUTTED INTO THE CCR[3] REGISTER
 void blue_LED(float DC){

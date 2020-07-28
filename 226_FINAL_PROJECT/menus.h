@@ -15,7 +15,7 @@ void light_menu();
 void red_LED_menu();
 void green_LED_menu();
 void blue_LED_menu();
-uint8_t DebounceSwitch(void);
+void DebounceSwitch(void);
 void servo_menu();
 void disarm_menu();
 

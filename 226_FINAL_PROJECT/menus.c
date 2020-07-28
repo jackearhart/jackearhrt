@@ -20,7 +20,8 @@
 #include <stdio.h>  //library for printing things to the console window
 #include <string.h> //library to display strings of text to the LCD
 volatile int button_check;
-
+volatile float nADC;      //global variable used in the ADC handler
+volatile uint16_t result; //global variable used in the ADC handler
 //global variable to be used in different alarm menu
 volatile int pin_check;
 volatile int door_check=0;
@@ -30,7 +31,7 @@ volatile int door_pin3=0;
 volatile int beep_check;
 volatile int arm_check;
 volatile uint8_t motor_choice=0;
-volatile uint8_t button;
+volatile uint8_t button=0;
 volatile uint8_t green_LED_choice;
 volatile uint8_t blue_LED_choice;
 volatile uint8_t red_LED_choice;
@@ -63,6 +64,7 @@ void main_menu(void){
       LCD_data(*(data+i));                  //print the character and move to the next on the fourth line
    }
   while(1){
+
       ADC14->CTL0|= ADC14_CTL0_SC;
       __sleep();
       delayMs(100);
@@ -489,58 +491,52 @@ return;
 }
 }
 
-uint8_t DebounceSwitch(void){
-    int check = 0;
+void DebounceSwitch(void){
 
         if( ( P1IN & BIT6 )  == 0x00){                      //If P1.1 is equal to zero
-            SysTickInit_WithInterrupts(5);                                     //delaying the cycles for 5ms using delayMS custom function
+            SysTickInit_WithInterrupts(7);                  //delaying the cycles for 5ms using the SysTick delay function with interrupts
             if( ( P1IN & BIT6 ) == 0x00){                   //Checking a second time to see if P1.1 is equal to zero
                 while( ( P1IN & BIT6 ) == 0x00);            //Keeping the code here while the button is being held down
-                check = 1;                                  //Once let go check is set to 1 to be returned
+                                                 //Once let go check is set to 1 to be returned
+               // P1->IFG |= BIT6;
             }
+            P1->IFG |= BIT6;
         }
-        return check;
+        return;
 }
 
 void PORT1_IRQHandler(void){
-   // ADC14->IV=0;
-    int check = 0;
-           if( ( P1IN & BIT6 )  == 0x00){                      //If P1.1 is equal to zero
-               SysTickInit_WithInterrupts(5);                                     //delaying the cycles for 5ms using delayMS custom function
-               if( ( P1IN & BIT6 ) == 0x00){                   //Checking a second time to see if P1.1 is equal to zero
-                   while( ( P1IN & BIT6 ) == 0x00);            //Keeping the code here while the button is being held down
-                   check = 1;                                  //Once let go check is set to 1 to be returned
-               }
-           }
-    if (check && button==1) {  //if the interrupt button for the lights was turned off and pressed again to turn the lights back on
-           P1->IFG &=~BIT6;                  //clear the interrupt flag
+    if ((P1->IFG & BIT6) && button==1) {  //if the interrupt button for the lights was turned off and pressed again to turn the lights back on
+        P1->IFG &=~BIT6;                  //clear the interrupt flag
            green_LED(green_LED_choice);      //turn the green LED back to the brightness it was at
            blue_LED(blue_LED_choice);        //turn the blue LED back to the brightness it was at
            red_LED(red_LED_choice);          //turn the red LED back to the brightness it was at
            motor_PWM(motor_choice);          //calling the function that spins the motor at a DC corresponding to the keypad input
            sevensegement(motor_choice);      //calling the 7 segment display function that displays the number entered from the keypad
            button=0;                         //let the program know that the button was pressed to turn the LEDs back on
-           return;
-
 
        }
-       if (check){               //if the lights were turned on
-           P1->IFG &=~BIT6;                  //clear the interrupt flag
-           green_LED(0);                    //turn off any light that was on prior to the button being pushed
-           red_LED(0);
-           blue_LED(0);
-           motor_PWM(motor_choice);          //calling the function that spins the motor at a DC corresponding to the keypad input
-           sevensegement(motor_choice);      //calling the 7 segment display function that displays the number entered from the keypad
-           button=1;                         //set the button variable to zero
-           return;
-   }
+
+    if ((P1->IFG & BIT6)){                            //if the lights were turned on
+        P1->IFG &=~BIT6;                   //clear the interrupt flag
+              green_LED(0);                    //turn off any light that was on prior to the button being pushed
+              red_LED(0);
+              blue_LED(0);
+              motor_PWM(motor_choice);          //calling the function that spins the motor at a DC corresponding to the keypad input
+              sevensegement(motor_choice);      //calling the 7 segment display function that displays the number entered from the keypad
+              button=1;                         //set the button variable to zero
+
+      }
+
+
     if (P1->IFG & BIT7){
         motor_choice=0;
         TIMER_A2->CCR[1] = (72000*0); //turn the motor off by making the CCR[1] register equal to 0
         P1->IFG &=~BIT7;              //clear the interrupt flag that was set and initiated the interrupt
         print0();                     //print 0 on the seven segment display
-    }
 
+    }
+return;
 }
 
 

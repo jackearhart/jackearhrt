@@ -36,6 +36,7 @@ while((SysTick->CTRL & 0x10000)==0) //busy while loop
            {}
     SysTick->CTRL = 0;              //reset CTRL register once flag has been set
 }
+//SysTick delay function that delays milliseconds but has interrupts enabled
 void SysTickInit_WithInterrupts(uint32_t delay_ms){
     SysTick->CTRL  &= ~BIT0;                                             //clears enable to stop the counter
     SysTick->LOAD   = delay_ms * 3000;                                   //sets the period
