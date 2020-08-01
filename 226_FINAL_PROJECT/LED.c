@@ -1,3 +1,11 @@
+/*  Author: Jack Earhart
+ *  Start Date:07/05/2020
+ *  End Date: 07/29/2020
+ *  File: LED.c
+ *  Description: This file initializes the RGB LED pins and Timer_A modules associated with them.
+ *               In addition, it also has functions to drive a PWM signal to a specific LED to control
+ *               the brightness of the LED.
+ */
 #include "LED.h"
 #include "msp.h"
 #include "LCD.h"
@@ -6,7 +14,9 @@
 #include "menus.h"
 #include "servo.h"
 #include "ADC.h"
-//FUNCTION USED TO INTIALIZE ALL PINS USED ON THE RGB LED, AS WELL AS THE BUTTON USED TO INTERRUPT THE RGB LED
+//description: FUNCTION USED TO INTIALIZE ALL PINS USED ON THE RGB LED, AS WELL AS THE BUTTON USED TO INTERRUPT THE RGB LED
+//Input: void
+//Output: void
 void RBG_LED_init(){
        //INITIALIZATION FOR P2.6 (TIMER_A PIN FUNCTIONALITY) P2.6= TA0.3
        //sel1=0, and sel0=0 allows for PWM functionality
@@ -40,7 +50,9 @@ void RBG_LED_init(){
 
 
 }
-//FUNCTION THAT CONTROLS THE BRIGHTNESS OF THE BLUE LED, GIVEN AN INPUT FOR THE DUTY CYCLE TO BE INPUTTED INTO THE CCR[3] REGISTER
+//description: FUNCTION THAT CONTROLS THE BRIGHTNESS OF THE BLUE LED, GIVEN AN INPUT FOR THE DUTY CYCLE TO BE INPUTTED INTO THE CCR[3] REGISTER
+//Input: void
+//Output: void
 void blue_LED(float DC){
 
          TIMER_A0->CCR[0] = 3000;                       //count up to the value of 3,000 in the TIMER_A0 CCR register
@@ -50,11 +62,13 @@ void blue_LED(float DC){
                  TIMER_A_CTL_MC__UP|             //mode control is going to be UP selecting it in the CTL register (mode control for the counting direction)
                  TIMER_A_CTL_CLR;                //clear the the timer in the CTL register, TACLR to clear it
 
-                 TIMER_A0->CCR[3] = (30*DC); //continuously updating the CCR[3] with a value of DC(0-10) * P
+                 TIMER_A0->CCR[3] = (3*DC); //continuously updating the CCR[3] with a value of DC(0-10) * P
 
 }
 
-//FUNCTION THAT CONTROLS THE BRIGHTNESS OF THE GREEN LED, GIVEN AN INPUT FOR THE DUTY CYCLE TO BE INPUTTED INTO THE CCR[2] REGISTER
+//description: FUNCTION THAT CONTROLS THE BRIGHTNESS OF THE GREEN LED, GIVEN AN INPUT FOR THE DUTY CYCLE TO BE INPUTTED INTO THE CCR[2] REGISTER
+//Input: void
+//Output: void
 void green_LED(float DC){
 
     TIMER_A2->CCR[1] = 3000;                       //count up to the value 3,000 in the TIMER_A2 CCR register
@@ -67,7 +81,9 @@ void green_LED(float DC){
              TIMER_A2->CCR[2] = (30*DC);//continuously updating the CCR[2] with a value of DC1(0-1) * P
 
 }
-//FUNCTION THAT CONTROLS THE BRIGHTNESS OF THE RED LED, GIVEN AN INPUT FOR THE DUTY CYCLE TO BE INPUTTED INTO THE CCR[3] REGISTER
+//description: FUNCTION THAT CONTROLS THE BRIGHTNESS OF THE RED LED, GIVEN AN INPUT FOR THE DUTY CYCLE TO BE INPUTTED INTO THE CCR[3] REGISTER
+//Input: void
+//Output: void
 void red_LED(float DC){
 
              TIMER_A1->CCR[0] = 3000;                       //count up to the value of 3,000 in the TIMER_A1 CCR register

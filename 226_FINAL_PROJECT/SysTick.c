@@ -10,7 +10,9 @@
 #include "msp.h"
 #include "Systick.h"
 #include"motor.h"
-//SysTick delay function that takes in a number input to make delays
+//description: SysTick delay function that takes in a number input to make delays
+//input: uint32 number
+//output: void
 void delayMs(uint32_t n){
     SysTick-> CTRL = 0;             //set CTRL register  to zero
        SysTick-> LOAD = 0xFFFFFF;   //load max value for a 24 bit counter
@@ -23,7 +25,9 @@ while((SysTick->CTRL & 0x10000)==0) //busy while loop
            {}
     SysTick->CTRL = 0;              //reset CTRL register once flag has been set
 }
-//SysTick delay function that takes in a number input to make delays (an input of 1 makes a microsecond delay)
+//description: SysTick delay function that takes in a number input to make delays (an input of 1 makes a microsecond delay)
+//input: uint32 number
+//output: void
 void delayUs(uint32_t n){
     SysTick-> CTRL = 0;             //set CTRL register  to zero
        SysTick-> LOAD = 0xFFFFFF;   //load max value for a 24 bit counter
@@ -36,7 +40,9 @@ while((SysTick->CTRL & 0x10000)==0) //busy while loop
            {}
     SysTick->CTRL = 0;              //reset CTRL register once flag has been set
 }
-//SysTick delay function that delays milliseconds but has interrupts enabled
+//description: SysTick delay function that delays milliseconds but has interrupts enabled
+//input: uint32 number
+//output: void
 void SysTickInit_WithInterrupts(uint32_t delay_ms){
     SysTick->CTRL  &= ~BIT0;                                             //clears enable to stop the counter
     SysTick->LOAD   = delay_ms * 3000;                                   //sets the period

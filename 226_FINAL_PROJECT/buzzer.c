@@ -7,7 +7,9 @@
  */
 #include "msp.h"
 #include "SysTick.h"
-//THIS FUNCTION INTIALIZES THE SPEAKER'S PIN BEING USED
+//description: THIS FUNCTION INTIALIZES THE SPEAKER'S PIN BEING USED
+//Input: void
+//Output: void
 void buzzer_init(){
     P2->SEL1 &= ~BIT5;      //clear the SEL1 register
     P2->SEL0 &= ~BIT5;      //clear the SEL0 register
@@ -15,7 +17,9 @@ void buzzer_init(){
     P2->OUT  &=~ BIT5;      //drive the speaker LOW initially
 }
 
-//THIS FUNCTION GENERATES A TONE FOR THE SPEAKER TO PLAY
+//description: THIS FUNCTION GENERATES A TONE FOR THE SPEAKER TO PLAY
+//Input: unsigned integer for the tone, unsigned integer for the tone duration
+//Output: void
 void beep(unsigned int note, unsigned int duration)
 {
 int i;

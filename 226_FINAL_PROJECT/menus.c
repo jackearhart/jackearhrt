@@ -19,6 +19,7 @@
 #include "buzzer.h"
 #include <stdio.h>  //library for printing things to the console window
 #include <string.h> //library to display strings of text to the LCD
+//global variables used in the ADC interrupt
 volatile int button_check;
 volatile float nADC;      //global variable used in the ADC handler
 volatile uint16_t result; //global variable used in the ADC handler
@@ -30,18 +31,21 @@ volatile int door_pin2=0;
 volatile int door_pin3=0;
 volatile int beep_check;
 volatile int arm_check;
+//global variables used for the motor and LEDs in the port 1 interrupt
 volatile uint8_t motor_choice=0;
 volatile uint8_t button=0;
 volatile uint8_t green_LED_choice;
 volatile uint8_t blue_LED_choice;
 volatile uint8_t red_LED_choice;
 
-//inital screen shown to the user to choose an option
+//description: Initial screen shown to the user to choose an option
+//input: void
+//output: void
 void main_menu(void){
 
-  LCD_command(0x01);  //clear the LCD of any previous text
-  char data[16] = "";   //data array to copy strings into it
-  int i;                //variable for counter
+  LCD_command(0x01);                        //clear the LCD of any previous text
+  char data[16] = "";                       //data array to copy strings into it
+  int i;                                    //variable for counter
 
   sprintf(data,"(1) Door Menu");            //first string to be copied onto the LCD
   LCD_command(0x81);                        // move to the first line fourth position
@@ -64,7 +68,6 @@ void main_menu(void){
       LCD_data(*(data+i));                  //print the character and move to the next on the fourth line
    }
   while(1){
-
       ADC14->CTL0|= ADC14_CTL0_SC;
       __sleep();
       delayMs(100);
@@ -85,7 +88,10 @@ void main_menu(void){
       }
   }
 }
-//1st menu option on the main menu, turns the servo 90 degrees if open->close or close->open
+
+//description: 1st menu option on the main menu, turns the servo 90 degrees if open->close or close->open
+//input: void
+//output: void
 void door_menu(){
 //if the alarm has not been set, the "door_check" variable is zero and the servo menu is called
     if (door_check==0){
@@ -124,312 +130,9 @@ void door_menu(){
        }
   }
 }
-//2nd menu option on the main menu, user can turn the motor on different speeds
-void motor_menu(){
-     LCD_command(0x01);
-     char data[16] = "";                        //data array to copy strings into it
-     int i;                                     //variable for counter
-     sprintf(data,"MOTOR MENU");                //first string to be copied onto the LCD
-     LCD_command(0x83);                         // move to the first line fourth position
-     for (i=0;i<(unsigned) strlen(data);i++){   //print data string character by character that's held in the data array
-        LCD_data(*(data+i));                    //print the data string of text to the LCD
-     }
-     sprintf(data,"Enter a speed ");           //re-populate the data string to hold the new line of text
-     LCD_command(0xC0);                        //move to the second line 4th position
-     for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
-         LCD_data(*(data+i));                  //print the character and move to the next on the second line
-      }
-     sprintf(data,"for the motor to");         //re-populate the data string to hold the new line of text
-     LCD_command(0x90);                        //move to the third line 1st position
-     for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
-         LCD_data(*(data+i));                  //print the character and move to the next on the third line
-      }
-
-     sprintf(data,"spin at (0-9)");           //re-populate the data string to hold the new line of text
-     LCD_command(0xD0);                       //move to the fourth line 6th position
-     for (i=0;i<(unsigned) strlen(data);i++){ //print data string character by character that's held in the data array
-         LCD_data(*(data+i));                 //print the character and move to the next on the fourth line
-        }
-while(1){
-            motor_choice = read_keypad();     //variable motor_choice stores the value entered from the keypad input
-            if (motor_choice!=0){             //if the keypad value returned isn't NULL
-            motor_PWM(motor_choice);          //calling the function that spins the motor at a DC corresponding to the keypad input
-            sevensegement(motor_choice);      //calling the 7 segment display function that displays the number entered from the keypad
-            main_menu();                      //go back to the main menu
-            return;
-            }
-}
-}
-
-void light_menu(){
-    LCD_command(0x01);
-    char data[16] = "";                       //data array to copy strings into it
-     int i;                                   //variable for counter
-
-     sprintf(data,"LIGHT MENU");              //first string to be copied onto the LCD
-     LCD_command(0x83);                       // move to the first line fourth position
-     for (i=0;i<(unsigned) strlen(data);i++){ //print data string character by character that's held in the data array
-        LCD_data(*(data+i));                  //print the data string of text to the LCD
-     }
-     sprintf(data,"(1)for red LED ");         //re-populate the data string to hold the new line of text
-     LCD_command(0xC0);                       //move to the second line 1st position
-     for (i=0;i<(unsigned) strlen(data);i++){ //print data string character by character that's held in the data array
-         LCD_data(*(data+i));                 //print the character and move to the next on the second line
-      }
-
-     sprintf(data,"(2)for green LED");        //re-populate the data string to hold the new line of text
-     LCD_command(0x90);                       //move to the third line 1st position
-     for (i=0;i<(unsigned) strlen(data);i++){ //print data string character by character that's held in the data array
-         LCD_data(*(data+i));                 //print the character and move to the next on the third line
-      }
-
-     sprintf(data,"(3)for blue LED");           //re-populate the data string to hold the new line of text
-       LCD_command(0xD0);                       //move to the fourth line 1st position
-       for (i=0;i<(unsigned) strlen(data);i++){ //print data string character by character that's held in the data array
-           LCD_data(*(data+i));                 //print the character and move to the next on the fourth line
-        }
-       while(1){
-     uint8_t LED_choice = read_keypad();       //variable that reads which LED color option was selected from the keypad
-       if (LED_choice==1){
-           red_LED_menu();                     //if 1 was entered, go to the red LED menu
-       }
-       if (LED_choice==2){
-          green_LED_menu();                    //if 2 was entered, go to the green LED menu
-       }
-       if (LED_choice==3){
-           blue_LED_menu();                    //if 3 was entered, go to the blue LED menu
-       }
-       if (LED_choice==10){
-            main_menu();                       //if * was entered, go the main menu
-    return;
-
-        }
-       }
-
-}
-void red_LED_menu(){
-   LCD_command(0x01);                       //clear the LCD screen of any information
-   char data[16] = "";                      //data array to copy strings into it
-   int i;                                   //variable for counter
-   sprintf(data,"RED LED MENU");            //first string to be copied onto the LCD
-   LCD_command(0x82);                       // move to the first line 3rd position
-   for (i=0;i<(unsigned) strlen(data);i++){ //print data string character by character that's held in the data array
-        LCD_data(*(data+i));                //print the data string of text to the LCD
-     }
-  sprintf(data,"Set brightness:");          //re-populate the data string to hold the new line of text
-  LCD_command(0xC0);                        //move to the second line 1st position
-  for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
-        LCD_data(*(data+i));                //print the character and move to the next on the second line
-      }
-  sprintf(data,"Any digit 0-100.");         //re-populate the data string to hold the new line of text
-  LCD_command(0x90);                        //move to the third line 1st position
-  for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
-          LCD_data(*(data+i));              //print the character and move to the next on the third line
-       }
-  sprintf(data,"Press # to enter");         //re-populate the data string to hold the new line of text
-  LCD_command(0xD0);                        //move to the fourth line 1st position
-  for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
-            LCD_data(*(data+i));            //print the character and move to the next on the third line
-         }
-        while(1){
-            red_LED_choice = keypad_pin();  //variable to check the brightness value for the red LED entered by the user
-            red_LED(red_LED_choice);        //turn on the red LED, by calling the function with the input entered by user
-            blue_LED_choice=0;              //turn the blue LED choice to 0
-            green_LED_choice=0;             //turn the green LED to 0
-            blue_LED(0);                    //turn the blue LED off completely by giving it a Duty Cycle of 0
-            green_LED(0);                   //turn the green LED off completely by giving it a Duty Cycle of 0
-            motor_PWM(motor_choice);          //calling the function that spins the motor at a DC corresponding to the keypad input
-            sevensegement(motor_choice);      //calling the 7 segment display function that displays the number entered from the keypad
-            main_menu();                    //after the above tasks are complete go back to the main menu
-            return;
-        }
-}
-
-void green_LED_menu(){
-  LCD_command(0x01);
-  char data[16] = "";                       //data array to copy strings into it
-  int i;                                    //variable for counter
-  sprintf(data,"GREEN LED MENU");           //first string to be copied onto the LCD
-  LCD_command(0x81);                        // move to the first line fourth position
-  for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
-        LCD_data(*(data+i));                //print the data string of text to the LCD
-     }
-  sprintf(data,"Set brightness:");          //re-populate the data string to hold the new line of text
-  LCD_command(0xC0);                        //move to the second line 4th position
-  for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
-         LCD_data(*(data+i));               //print the character and move to the next on the second line
-      }
-  sprintf(data,"Any digit 0-100.");         //re-populate the data string to hold the new line of text
-  LCD_command(0x90);                        //move to the third line 1st position
-  for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
-          LCD_data(*(data+i));              //print the character and move to the next on the third line
-       }
-  sprintf(data,"Press # to enter");         //re-populate the data string to hold the new line of text
-  LCD_command(0xD0);                        //move to the third line 1st position
-  for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
-            LCD_data(*(data+i));            //print the character and move to the next on the third line
-         }
-        while(1){
-          green_LED_choice = keypad_pin();  //variable to check the brightness value for the green LED entered by the user
-          green_LED(green_LED_choice);      //turn on the green LED, by calling the function with the input entered by user
-          blue_LED_choice=0;                //turn the blue LED choice to 0
-          red_LED_choice=0;                 //turn the red LED choice to 0
-          blue_LED(0);                      //turn the blue LED off completely by giving it a Duty Cycle of 0
-          red_LED(0);                       //turn the red LED off completely by giving it a Duty Cycle of 0
-          motor_PWM(motor_choice);          //calling the function that spins the motor at a DC corresponding to the keypad input
-          sevensegement(motor_choice);      //calling the 7 segment display function that displays the number entered from the keypad
-          main_menu();                      //after the above tasks are complete go back to the main menu
-          return;
-        }
-}
-
-void blue_LED_menu(){
-
-  LCD_command(0x01);
-  char data[16] = "";                       //data array to copy strings into it
-  int i;                                    //variable for counter
-  sprintf(data,"BLUE LED MENU");            //first string to be copied onto the LCD
-  LCD_command(0x82);                        // move to the first line 3rd position
-  for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
-        LCD_data(*(data+i));                //print the data string of text to the LCD
-     }
-  sprintf(data,"Set brightness");           //re-populate the data string to hold the new line of text
-  LCD_command(0xC0);                        //move to the second line 1st position
-  for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
-         LCD_data(*(data+i));               //print the character and move to the next on the second line
-      }
-  sprintf(data,"Any digit 0-100.");         //re-populate the data string to hold the new line of text
-  LCD_command(0x90);                        //move to the third line 1st position
-  for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
-          LCD_data(*(data+i));              //print the character and move to the next on the third line
-       }
-  sprintf(data,"Press # to enter");         //re-populate the data string to hold the new line of text
-  LCD_command(0xD0);                        //move to the fourth line 1st position
-  for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
-            LCD_data(*(data+i));            //print the character and move to the next on the third line
-         }
-        while(1){
-          blue_LED_choice = keypad_pin();   //variable to check the brightness value for the blue LED entered by the user
-          blue_LED(blue_LED_choice);        //turn on the blue LED, by calling the function with the input entered by user
-          red_LED_choice=0;                 //turn the red LED choice to 0
-          green_LED_choice=0;               //turn the blue LED choice to 0
-          green_LED(0);                     //turn the green LED off completely by giving it a Duty Cycle of 0
-          red_LED(0);                       //turn the red LED choice off completely by giving it a Duty Cycle of 0
-          motor_PWM(motor_choice);          //calling the function that spins the motor at a DC corresponding to the keypad input
-          sevensegement(motor_choice);      //calling the 7 segment display function that displays the number entered from the keypad
-          main_menu();                      //after the above tasks are complete go back to the main menu
-          return;
-        }
-
-}
-void disarm_menu(){
-
-  if (door_check==0){                       //if no passcode has been entered yet and the user chooses the disarm menu option
-  LCD_command(0x01);
-  char data[16] = "";                       //data array to copy strings into it
-  int i;                                    //variable for counter
-  sprintf(data,"ARM ALARM");                //first string to be copied onto the LCD
-  LCD_command(0x84);                        // move to the first line 5th position
-  for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
-        LCD_data(*(data+i));                //print the data string of text to the LCD
-     }
-  sprintf(data,"Enter 4 digit ");            //re-populate the data string to hold the new line of text
-  LCD_command(0xC1);                         //move to the second line 2nd position
-  for (i=0;i<(unsigned) strlen(data);i++){   //print data string character by character that's held in the data array
-         LCD_data(*(data+i));                //print the character and move to the next on the second line
-      }
-
-  sprintf(data,"key to arm door:");         //re-populate the data string to hold the new line of text
-  LCD_command(0x91);                        //move to the third line 2nd position
-  for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
-         LCD_data(*(data+i));               //print the character and move to the next on the third line
-      }
-while(1){
-    char data[16] = "";                     //data array to copy strings into it
-    int i;                                  //variable for counter
-
-   door_pin = keypad_door();
-   if (door_pin!=0){
-   sprintf(data,"%d",door_pin);              //re-populate the data string to hold the new line of text
-   LCD_command(0xD5);                        //move to the fourth line 6th position
-   for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
-          LCD_data(*(data+i));               //print the character and move to the next on the fourth line
-       }
-     }
-   delayMs(2000);                           //delay the LCD screen for 2 seconds to show the passcode entered by the user
-
-   LCD_command(0x01);                       //clear the LCD screen
-   printf ("you entered %d\n\n",door_pin);
-
-  sprintf(data,"ALARM ARMED!");             //re-populate the data string to hold the new line of text
-  LCD_command(0x92);                        //move to the third line 3rd position
-  for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
-         LCD_data(*(data+i));               //print the character and move to the next on the third line
-
-      }
-  delayMs(1500);                            //delay the LCD screen for 1.5 seconds to show the ALARM ARMED text
-  door_check=1;                             //set the door check alarm to 1 so the user must enter the pass code and so the alarm can beep
-
-main_menu();
-return;
-}
-    }
-
-   if (door_check==1){                     //if the alarm has been armed and the ARM/DISARM MENU option was chosen, the user can disarm the alarm
-   LCD_command(0x01);                      //Clear the LCD screen
-   char data[16] = "";                     //data array to copy strings into it
-   int i;                                  //variable for counter
-   sprintf(data,"DISARM ALARM");           //first string to be copied onto the LCD
-   LCD_command(0x82);                      // move to the first line fourth position
-   for (i=0;i<(unsigned) strlen(data);i++){//print data string character by character that's held in the data array
-                LCD_data(*(data+i));       //print the data string of text to the LCD
-             }
-   sprintf(data,"Your 4 digit key");       //re-populate the data string to hold the new line of text
-   LCD_command(0xC0);                      //move to the second line 4th position
-   for (i=0;i<(unsigned) strlen(data);i++){//print data string character by character that's held in the data array
-                 LCD_data(*(data+i));      //print the character and move to the next on the second line
-              }
-
-   sprintf(data,"used to arm door:");      //re-populate the data string to hold the new line of text
-   LCD_command(0x90);                      //move to the third line 1st position
-   for (i=0;i<(unsigned) strlen(data);i++){//print data string character by character that's held in the data array
-                 LCD_data(*(data+i));      //print the character and move to the next on the third line
-              }
-   while(1){
-   door_pin3 = keypad_door();              //variable to check if the disarm pass-key is equal to the arm
-   printf ("you entered %d\n\n",door_pin); //PRINTF statement
-   if (door_pin3!=0){                      //if the pass-key entered is not equal to a none zero value
-   sprintf(data,"%d",door_pin3);           //re-populate the data string to hold the new line of text
-   LCD_command(0xD5);                      //move to the fourth line 6th position
-   for (i=0;i<(unsigned) strlen(data);i++){//print data string character by character that's held in the data array
-                 LCD_data(*(data+i));      //print the character and move to the next on the fourth line
-              }
-            }
-  delayMs(2000);                           //delay for 2 seconds to display the disarm pass-key on the LCD
-  if (door_pin3==door_pin){                //if the disarm pass-key is equal to the initial pass-key entered to arm the alarm
-  door_check=0;                            //set the door_check variable to 0 to let the program know there isn't a pass-key
-  LCD_command(0x01);                       //clear the LCD screen
-  char data[16] = "";                      //data array to copy strings into it
-  int i;                                   //variable for counter
-  sprintf(data,"ALARM DISARMED!");         //re-populate the data string to hold the new line of text
-  LCD_command(0x90);                       //move to the third line 1st position
-  for (i=0;i<(unsigned) strlen(data);i++){ //print data string character by character that's held in the data array
-            LCD_data(*(data+i));           //print the character and move to the next on the third line
-
-          }
- delayMs(1500);                            //delay for 2 seconds to display ALARM DISARMED on the LCD
- beep_check=0;                             //set the beep_check variable to zero so the speaker doesn't beep when the servo is opened, when the pass-key is not on
-}
- if (door_pin3!=door_pin){                 //if the pass-key doesn't equal the initial pass-key put in place to arm the alarm
-       main_menu();                        //go back to the main menu
-       return;
-            }
-      main_menu();
-      return;
-        }
-    }
-    }
-
+//description: FUNCTION THAT DISPLAYS THE OPTIONS FOR THE DOOR ON THE LCD UPON ENTERING THE "DOOR MENU" IF NO PASS KEY WAS PUT IN PLACE, OR IT WAS ENTERED CORRECTLY
+//input: void
+//output: void
 void servo_menu(){
   LCD_command(0x01);                      //clear the LCD screen
   char data[16] = "";                     //data array to copy strings into it
@@ -491,20 +194,338 @@ return;
 }
 }
 
-void DebounceSwitch(void){
+//description: 2nd menu option on the main menu, user can turn the motor on different speeds
+//input: void
+//output: void
+void motor_menu(){
+     LCD_command(0x01);
+     char data[16] = "";                        //data array to copy strings into it
+     int i;                                     //variable for counter
+     sprintf(data,"MOTOR MENU");                //first string to be copied onto the LCD
+     LCD_command(0x83);                         // move to the first line fourth position
+     for (i=0;i<(unsigned) strlen(data);i++){   //print data string character by character that's held in the data array
+        LCD_data(*(data+i));                    //print the data string of text to the LCD
+     }
+     sprintf(data,"Enter a speed ");           //re-populate the data string to hold the new line of text
+     LCD_command(0xC0);                        //move to the second line 4th position
+     for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
+         LCD_data(*(data+i));                  //print the character and move to the next on the second line
+      }
+     sprintf(data,"for the motor to");         //re-populate the data string to hold the new line of text
+     LCD_command(0x90);                        //move to the third line 1st position
+     for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
+         LCD_data(*(data+i));                  //print the character and move to the next on the third line
+      }
 
+     sprintf(data,"spin at (0-9)");           //re-populate the data string to hold the new line of text
+     LCD_command(0xD0);                       //move to the fourth line 6th position
+     for (i=0;i<(unsigned) strlen(data);i++){ //print data string character by character that's held in the data array
+         LCD_data(*(data+i));                 //print the character and move to the next on the fourth line
+        }
+while(1){
+            motor_choice = read_keypad();     //variable motor_choice stores the value entered from the keypad input
+            if (motor_choice!=0){             //if the keypad value returned isn't NULL
+            motor_PWM(motor_choice);          //calling the function that spins the motor at a DC corresponding to the keypad input
+            sevensegement(motor_choice);      //calling the 7 segment display function that displays the number entered from the keypad
+            main_menu();                      //go back to the main menu
+            return;
+            }
+}
+}
+//description: 3rd menu option on the main menu, that awaits user input from the keypad to navigate to one of the three light menus
+//input: void
+//output: void
+void light_menu(){
+    LCD_command(0x01);
+    char data[16] = "";                       //data array to copy strings into it
+     int i;                                   //variable for counter
+
+     sprintf(data,"LIGHT MENU");              //first string to be copied onto the LCD
+     LCD_command(0x83);                       // move to the first line fourth position
+     for (i=0;i<(unsigned) strlen(data);i++){ //print data string character by character that's held in the data array
+        LCD_data(*(data+i));                  //print the data string of text to the LCD
+     }
+     sprintf(data,"(1)for red LED ");         //re-populate the data string to hold the new line of text
+     LCD_command(0xC0);                       //move to the second line 1st position
+     for (i=0;i<(unsigned) strlen(data);i++){ //print data string character by character that's held in the data array
+         LCD_data(*(data+i));                 //print the character and move to the next on the second line
+      }
+
+     sprintf(data,"(2)for green LED");        //re-populate the data string to hold the new line of text
+     LCD_command(0x90);                       //move to the third line 1st position
+     for (i=0;i<(unsigned) strlen(data);i++){ //print data string character by character that's held in the data array
+         LCD_data(*(data+i));                 //print the character and move to the next on the third line
+      }
+
+     sprintf(data,"(3)for blue LED");           //re-populate the data string to hold the new line of text
+       LCD_command(0xD0);                       //move to the fourth line 1st position
+       for (i=0;i<(unsigned) strlen(data);i++){ //print data string character by character that's held in the data array
+           LCD_data(*(data+i));                 //print the character and move to the next on the fourth line
+        }
+       while(1){
+     uint8_t LED_choice = read_keypad();       //variable that reads which LED color option was selected from the keypad
+       if (LED_choice==1){
+           red_LED_menu();                     //if 1 was entered, go to the red LED menu
+       }
+       if (LED_choice==2){
+          green_LED_menu();                    //if 2 was entered, go to the green LED menu
+       }
+       if (LED_choice==3){
+           blue_LED_menu();                    //if 3 was entered, go to the blue LED menu
+       }
+       if (LED_choice==10){
+            main_menu();                       //if * was entered, go the main menu
+    return;
+
+        }
+       }
+
+}
+//description: first menu option displayed in the lights menu, and upon being called gives the user the ability to turn on the red LED at a desired brightness
+//input: void
+//output: void
+void red_LED_menu(){
+   LCD_command(0x01);                       //clear the LCD screen of any information
+   char data[16] = "";                      //data array to copy strings into it
+   int i;                                   //variable for counter
+   sprintf(data,"RED LED MENU");            //first string to be copied onto the LCD
+   LCD_command(0x82);                       // move to the first line 3rd position
+   for (i=0;i<(unsigned) strlen(data);i++){ //print data string character by character that's held in the data array
+        LCD_data(*(data+i));                //print the data string of text to the LCD
+     }
+  sprintf(data,"Set brightness:");          //re-populate the data string to hold the new line of text
+  LCD_command(0xC0);                        //move to the second line 1st position
+  for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
+        LCD_data(*(data+i));                //print the character and move to the next on the second line
+      }
+  sprintf(data,"Any digit 0-100.");         //re-populate the data string to hold the new line of text
+  LCD_command(0x90);                        //move to the third line 1st position
+  for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
+          LCD_data(*(data+i));              //print the character and move to the next on the third line
+       }
+  sprintf(data,"Press # to enter");         //re-populate the data string to hold the new line of text
+  LCD_command(0xD0);                        //move to the fourth line 1st position
+  for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
+            LCD_data(*(data+i));            //print the character and move to the next on the third line
+         }
+        while(1){
+            red_LED_choice = keypad_pin();  //variable to check the brightness value for the red LED entered by the user
+            red_LED(red_LED_choice);        //turn on the red LED, by calling the function with the input entered by user
+            blue_LED_choice=0;              //turn the blue LED choice to 0
+            green_LED_choice=0;             //turn the green LED to 0
+            blue_LED(0);                    //turn the blue LED off completely by giving it a Duty Cycle of 0
+            green_LED(0);                   //turn the green LED off completely by giving it a Duty Cycle of 0
+            motor_PWM(motor_choice);          //calling the function that spins the motor at a DC corresponding to the keypad input
+            sevensegement(motor_choice);      //calling the 7 segment display function that displays the number entered from the keypad
+            main_menu();                    //after the above tasks are complete go back to the main menu
+            return;
+        }
+}
+//description: second menu option displayed in the lights menu, and upon being called gives the user the ability to turn on the green LED at a desired brightness
+//input: void
+//output: void
+void green_LED_menu(){
+  LCD_command(0x01);
+  char data[16] = "";                       //data array to copy strings into it
+  int i;                                    //variable for counter
+  sprintf(data,"GREEN LED MENU");           //first string to be copied onto the LCD
+  LCD_command(0x81);                        // move to the first line fourth position
+  for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
+        LCD_data(*(data+i));                //print the data string of text to the LCD
+     }
+  sprintf(data,"Set brightness:");          //re-populate the data string to hold the new line of text
+  LCD_command(0xC0);                        //move to the second line 4th position
+  for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
+         LCD_data(*(data+i));               //print the character and move to the next on the second line
+      }
+  sprintf(data,"Any digit 0-100.");         //re-populate the data string to hold the new line of text
+  LCD_command(0x90);                        //move to the third line 1st position
+  for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
+          LCD_data(*(data+i));              //print the character and move to the next on the third line
+       }
+  sprintf(data,"Press # to enter");         //re-populate the data string to hold the new line of text
+  LCD_command(0xD0);                        //move to the third line 1st position
+  for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
+            LCD_data(*(data+i));            //print the character and move to the next on the third line
+         }
+        while(1){
+          green_LED_choice = keypad_pin();  //variable to check the brightness value for the green LED entered by the user
+          green_LED(green_LED_choice);      //turn on the green LED, by calling the function with the input entered by user
+          blue_LED_choice=0;                //turn the blue LED choice to 0
+          red_LED_choice=0;                 //turn the red LED choice to 0
+          blue_LED(0);                      //turn the blue LED off completely by giving it a Duty Cycle of 0
+          red_LED(0);                       //turn the red LED off completely by giving it a Duty Cycle of 0
+          motor_PWM(motor_choice);          //calling the function that spins the motor at a DC corresponding to the keypad input
+          sevensegement(motor_choice);      //calling the 7 segment display function that displays the number entered from the keypad
+          main_menu();                      //after the above tasks are complete go back to the main menu
+          return;
+        }
+}
+//description: third menu option displayed in the lights menu, and upon being called gives the user the ability to turn on the blue LED at a desired brightness
+//input: void
+//output: void
+void blue_LED_menu(){
+
+  LCD_command(0x01);
+  char data[16] = "";                       //data array to copy strings into it
+  int i;                                    //variable for counter
+  sprintf(data,"BLUE LED MENU");            //first string to be copied onto the LCD
+  LCD_command(0x82);                        // move to the first line 3rd position
+  for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
+        LCD_data(*(data+i));                //print the data string of text to the LCD
+     }
+  sprintf(data,"Set brightness");           //re-populate the data string to hold the new line of text
+  LCD_command(0xC0);                        //move to the second line 1st position
+  for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
+         LCD_data(*(data+i));               //print the character and move to the next on the second line
+      }
+  sprintf(data,"Any digit 0-100.");         //re-populate the data string to hold the new line of text
+  LCD_command(0x90);                        //move to the third line 1st position
+  for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
+          LCD_data(*(data+i));              //print the character and move to the next on the third line
+       }
+  sprintf(data,"Press # to enter");         //re-populate the data string to hold the new line of text
+  LCD_command(0xD0);                        //move to the fourth line 1st position
+  for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
+            LCD_data(*(data+i));            //print the character and move to the next on the third line
+         }
+        while(1){
+          blue_LED_choice = keypad_pin();   //variable to check the brightness value for the blue LED entered by the user
+          blue_LED(blue_LED_choice);        //turn on the blue LED, by calling the function with the input entered by user
+          red_LED_choice=0;                 //turn the red LED choice to 0
+          green_LED_choice=0;               //turn the blue LED choice to 0
+          green_LED(0);                     //turn the green LED off completely by giving it a Duty Cycle of 0
+          red_LED(0);                       //turn the red LED choice off completely by giving it a Duty Cycle of 0
+          motor_PWM(motor_choice);          //calling the function that spins the motor at a DC corresponding to the keypad input
+          sevensegement(motor_choice);      //calling the 7 segment display function that displays the number entered from the keypad
+          main_menu();                      //after the above tasks are complete go back to the main menu
+          return;
+        }
+
+}
+
+//description: fourth menu option displayed on the main menu, that gave the user the option to arm an alarm to be used in the door menu, or disarm the alarm if it was set previously
+//input: void
+//output: void
+void disarm_menu(){
+
+  if (door_check==0){                       //if no passcode has been entered yet and the user chooses the disarm menu option
+  LCD_command(0x01);
+  char data[16] = "";                       //data array to copy strings into it
+  int i;                                    //variable for counter
+  sprintf(data,"ARM ALARM");                //first string to be copied onto the LCD
+  LCD_command(0x84);                        // move to the first line 5th position
+  for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
+        LCD_data(*(data+i));                //print the data string of text to the LCD
+     }
+  sprintf(data,"Enter 4 digit ");            //re-populate the data string to hold the new line of text
+  LCD_command(0xC1);                         //move to the second line 2nd position
+  for (i=0;i<(unsigned) strlen(data);i++){   //print data string character by character that's held in the data array
+         LCD_data(*(data+i));                //print the character and move to the next on the second line
+      }
+  sprintf(data,"key to arm door:");         //re-populate the data string to hold the new line of text
+  LCD_command(0x91);                        //move to the third line 2nd position
+  for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
+         LCD_data(*(data+i));               //print the character and move to the next on the third line
+      }
+while(1){
+    char data[16] = "";                     //data array to copy strings into it
+    int i;                                  //variable for counter
+   door_pin = keypad_door();
+   if (door_pin!=0){
+   sprintf(data,"%d",door_pin);              //re-populate the data string to hold the new line of text
+   LCD_command(0xD5);                        //move to the fourth line 6th position
+   for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
+          LCD_data(*(data+i));               //print the character and move to the next on the fourth line
+       }
+     }
+   delayMs(2000);                           //delay the LCD screen for 2 seconds to show the passcode entered by the user
+   LCD_command(0x01);                       //clear the LCD screen
+   printf ("you entered %d\n\n",door_pin);
+  sprintf(data,"ALARM ARMED!");             //re-populate the data string to hold the new line of text
+  LCD_command(0x92);                        //move to the third line 3rd position
+  for (i=0;i<(unsigned) strlen(data);i++){  //print data string character by character that's held in the data array
+         LCD_data(*(data+i));               //print the character and move to the next on the third line
+      }
+  delayMs(1500);                            //delay the LCD screen for 1.5 seconds to show the ALARM ARMED text
+  door_check=1;                             //set the door check alarm to 1 so the user must enter the pass code and so the alarm can beep
+main_menu();
+return;
+}
+    }
+   if (door_check==1){                     //if the alarm has been armed and the ARM/DISARM MENU option was chosen, the user can disarm the alarm
+   LCD_command(0x01);                      //Clear the LCD screen
+   char data[16] = "";                     //data array to copy strings into it
+   int i;                                  //variable for counter
+   sprintf(data,"DISARM ALARM");           //first string to be copied onto the LCD
+   LCD_command(0x82);                      // move to the first line fourth position
+   for (i=0;i<(unsigned) strlen(data);i++){//print data string character by character that's held in the data array
+                LCD_data(*(data+i));       //print the data string of text to the LCD
+             }
+   sprintf(data,"Your 4 digit key");       //re-populate the data string to hold the new line of text
+   LCD_command(0xC0);                      //move to the second line 4th position
+   for (i=0;i<(unsigned) strlen(data);i++){//print data string character by character that's held in the data array
+                 LCD_data(*(data+i));      //print the character and move to the next on the second line
+              }
+   sprintf(data,"used to arm door:");      //re-populate the data string to hold the new line of text
+   LCD_command(0x90);                      //move to the third line 1st position
+   for (i=0;i<(unsigned) strlen(data);i++){//print data string character by character that's held in the data array
+                 LCD_data(*(data+i));      //print the character and move to the next on the third line
+              }
+   while(1){
+   door_pin3 = keypad_door();              //variable to check if the disarm pass-key is equal to the arm
+   printf ("you entered %d\n\n",door_pin); //PRINTF statement
+   if (door_pin3!=0){                      //if the pass-key entered is not equal to a none zero value
+   sprintf(data,"%d",door_pin3);           //re-populate the data string to hold the new line of text
+   LCD_command(0xD5);                      //move to the fourth line 6th position
+   for (i=0;i<(unsigned) strlen(data);i++){//print data string character by character that's held in the data array
+                 LCD_data(*(data+i));      //print the character and move to the next on the fourth line
+              }
+            }
+  delayMs(2000);                           //delay for 2 seconds to display the disarm pass-key on the LCD
+  if (door_pin3==door_pin){                //if the disarm pass-key is equal to the initial pass-key entered to arm the alarm
+  door_check=0;                            //set the door_check variable to 0 to let the program know there isn't a pass-key
+  LCD_command(0x01);                       //clear the LCD screen
+  char data[16] = "";                      //data array to copy strings into it
+  int i;                                   //variable for counter
+  sprintf(data,"ALARM DISARMED!");         //re-populate the data string to hold the new line of text
+  LCD_command(0x90);                       //move to the third line 1st position
+  for (i=0;i<(unsigned) strlen(data);i++){ //print data string character by character that's held in the data array
+            LCD_data(*(data+i));           //print the character and move to the next on the third line
+
+          }
+ delayMs(1500);                            //delay for 2 seconds to display ALARM DISARMED on the LCD
+ beep_check=0;                             //set the beep_check variable to zero so the speaker doesn't beep when the servo is opened, when the pass-key is not on
+}
+ if (door_pin3!=door_pin){                 //if the pass-key doesn't equal the initial pass-key put in place to arm the alarm
+       main_menu();                        //go back to the main menu
+       return;
+            }
+      main_menu();
+      return;
+        }
+    }
+    }
+
+
+//description: function used to debounce button input
+//input: void
+//output: an uint8_t variable to verify the button was pressed only once
+uint8_t DebounceSwitch(void){
+ int check = 0;
         if( ( P1IN & BIT6 )  == 0x00){                      //If P1.1 is equal to zero
             SysTickInit_WithInterrupts(7);                  //delaying the cycles for 5ms using the SysTick delay function with interrupts
             if( ( P1IN & BIT6 ) == 0x00){                   //Checking a second time to see if P1.1 is equal to zero
                 while( ( P1IN & BIT6 ) == 0x00);            //Keeping the code here while the button is being held down
-                                                 //Once let go check is set to 1 to be returned
-               // P1->IFG |= BIT6;
+                   check = 1;                               //Once let go check is set to 1 to be returned
             }
-            P1->IFG |= BIT6;
-        }
-        return;
-}
 
+        }
+        return check;
+}
+//description: port 1 irq handler used to turn the motor off if its button was pressed, and to turn the LED off if its button was pressed, or to turn the LED back on if it was pressed and the LED was on previously
+//input:void
+//output: void
 void PORT1_IRQHandler(void){
     if ((P1->IFG & BIT6) && button==1) {  //if the interrupt button for the lights was turned off and pressed again to turn the lights back on
         P1->IFG &=~BIT6;                  //clear the interrupt flag
@@ -527,7 +548,6 @@ void PORT1_IRQHandler(void){
               button=1;                         //set the button variable to zero
 
       }
-
 
     if (P1->IFG & BIT7){
         motor_choice=0;

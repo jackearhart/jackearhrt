@@ -23,7 +23,6 @@
 volatile float nADC;      //global variable used in the ADC handler
 volatile uint16_t result; //global variable used in the ADC handler
 int main(void){
-
     WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;    // stop watchdog timer
     NVIC->ISER[1] = 1 << ((PORT1_IRQn)& 31);       //enable port 1 interrupt on the NVIC
     //initialization Functions
@@ -40,13 +39,10 @@ int main(void){
     NVIC->ISER[0] |= 1 << ((ADC14_IRQn) & 31);     //enable ADC interrupts
     __enable_irq();                                //enable global interrupt
     main_menu();                                   //begin program at the main menu
-
-
 while(1){};
 }
 
 void ADC14_IRQHandler(void){
-
      ADC14->CTL0|= ADC14_CTL0_SC;                //start conversions on the ADC
      result = ADC14->MEM[0];                     //store the value of result to memory location 0, result being the value from the ADC potentiometer value
      nADC = (result * 3.3)/16384;                //convert the value of "result" into an actual voltage value reading and store it to "nADC"
@@ -57,8 +53,4 @@ void ADC14_IRQHandler(void){
                   TIMER_A_CTL_CLR;               //clear the the timer in the CTL register, TACLR to clear it
      TIMER_A0->CCR[1] = (300*nADC);              //continuously updating the CCR[1] with a value based on the "nADC" voltage from the potentiometer
      ADC14->IV=0;
-
-
 }
-
-

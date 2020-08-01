@@ -7,7 +7,10 @@
  */
 #include "msp.h"
 #include "ADC.h"
-//FUNCTION THAT INTIALIZES THE PINS USED FOR THE ADC CONVERSIONS
+
+//Descritpion:FUNCTION THAT INTIALIZES THE PINS USED FOR THE ADC CONVERSIONS
+//Inputs: void
+//Outputs: void
 void ADC14_pinInit(void){
     P5->SEL1 |= BIT5;       //clear SEL1 register for P5.5
     P5->SEL0 |= BIT5;       //clear SEL0 register for P5.5
@@ -19,7 +22,10 @@ void ADC14_pinInit(void){
     P2->DIR |=BIT4;         //set P2.4 as an output
     P2->OUT |= BIT4;        //drive P2.4 HIGH
 }
-//FUNCTION THAT CONFIGURES THE PERIPHALS USED BY THE ADC
+
+//Descritpion:FUNCTIONFUNCTION THAT CONFIGURES THE PERIPHALS USED BY THE ADC
+//Inputs: void
+//Outputs: void
 void ADC14_preiphInit(void){
     ADC14->CTL0 &=~ ADC14_CTL0_ENC;         //disable ADC conversions initially
     ADC14->CTL0    |= ADC14_CTL0_PDIV__64|  //pre-divide the ADC clock by 64
@@ -33,7 +39,4 @@ void ADC14_preiphInit(void){
     ADC14->IER0    |= ADC14_IER0_IE0;        //enable interrupts
     ADC14->CTL0    |= ADC14_CTL0_ENC;        //turn the ADC on for use
 }
-
-
-
 

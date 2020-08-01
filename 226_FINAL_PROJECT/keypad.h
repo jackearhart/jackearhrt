@@ -1,13 +1,8 @@
-/*  Name: Jack Earhart & Joe Besta
- *  Date: 06/15/2020
+/*  Author: Jack Earhart
+ *  Start Date:07/05/2020
+ *  End Date: 07/29/2020
  *  File: keypad.h
- *  Description: This file prototypes the functions used in the main.c and defined
- *               in the keypad.c source file, only 4 functions, a resistor configure
- *               function (void keypad_init(void)), a keypad reader (uint8_t read_keypad()),
- *               a systick delay function (void delay1ms(void)), and a print key
- *               function (void print_key()).
- *
-
+ *  Description: This file prototypes the custom functions defined in the keypad.c source file.
  */
 
 #ifndef KEYPAD_H_

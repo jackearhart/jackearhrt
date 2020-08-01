@@ -9,7 +9,9 @@
 #include "motor.h"
 #include "LED.h"
 #include "keypad.h"
-//FUNCTION THAT INITIALIZES THE MOTOR AND ITS INTERRUPT SWITCH
+//description: FUNCTION THAT INITIALIZES THE MOTOR AND ITS INTERRUPT SWITCH
+//Input: void
+//Output: void
 void motor_init(){
        P5->SEL0 |= BIT6;        //set BIT6 of SEL0 register for port 5
        P5->SEL1 &=~ BIT6;       //clear SEL1 register
@@ -33,7 +35,9 @@ void motor_init(){
                        TIMER_A_CTL_CLR;                     //clear the the timer in the CTL register, TACLR to clear it
 
 }
-//FUNCTION THAT SPINS THE DC MOTOR CONSTATNLY BY UPDATING THE CCR REGISTER WITH THE KEYPAD VALUE ENTERED IN THE MOTOR MENU OPTION
+//description: FUNCTION THAT SPINS THE DC MOTOR CONSTATNLY BY UPDATING THE CCR REGISTER WITH THE KEYPAD VALUE ENTERED IN THE MOTOR MENU OPTION
+//Input: a uint8_t variable
+//output: void
 void motor_PWM(uint8_t DC){
     TIMER_A2->CCR[1] = 72000*DC;                            //update the CCR[1] register with the value inputed into the function
 }

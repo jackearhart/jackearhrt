@@ -1,8 +1,8 @@
-/*  Name: Jack Earhart & Joe besta
- *  Date: 6/28/2020
+/*  Author: Jack Earhart
+ *  Start Date:07/05/2020
+ *  End Date: 07/29/2020
  *  File: LCD.h
- *  Description: This file prototypes all functions populated in the .c source file. In addition to this
- *               it defines all the RS, RW, and EN pins located on the MSP.
+ *  Description: This file prototypes the custom functions defined in the LCD.c source file.
  */
 #ifndef LCD_H_
 #define LCD_H_
@@ -15,6 +15,4 @@ void LCD_command(unsigned char command);
 void LCD_data(char data);
 void LCD_init(void);
 void LCD_nibble_write (char data, unsigned char control);
-
-
 #endif /* LCD_H_ */

@@ -7,7 +7,9 @@
  */
 #include "msp.h"
 #include "sevenseg.h"
-//FUNCTION THAT INITIAILIZES THE PINS USED FOR THE SEVEN SEGMENT DISPLAY, AND PRINTS ZERO INTIALLY
+//Description: FUNCTION THAT INITIAILIZES THE PINS USED FOR THE SEVEN SEGMENT DISPLAY, AND PRINTS ZERO INTIALLY
+//Inputs:void
+//Outputs: void
 void seg_init(){
     P3->SEL1 &= ~(BIT2|BIT3|BIT5|BIT6|BIT7);
     P3->SEL0 &= ~(BIT2|BIT3|BIT5|BIT6|BIT7);
@@ -17,7 +19,9 @@ void seg_init(){
     P5->DIR  |=  (BIT0|BIT1|BIT2);
     print0();
 }
-//FUNCTION THAT PRINTS A NUMBER 0-9 GIVEN AN INPUT VARIABLE, THAT VARIABLE BEING A NUMBER 1-9, AND 11 TO PRINT 0
+//Description: FUNCTION THAT PRINTS A NUMBER 0-9 GIVEN AN INPUT VARIABLE, THAT VARIABLE BEING A NUMBER 1-9, AND 11 TO PRINT 0
+//Inputs:void
+//Outputs: void
 void sevensegement(uint8_t sevenseg){
           if (sevenseg==1){
             print1();
@@ -50,6 +54,9 @@ void sevensegement(uint8_t sevenseg){
              print0();
 }
 }
+//Description: functions to turn on any and all numbers on the 7 segment display if called
+//inputs: void
+//Outputs: void
 void print0(){
     P3->OUT |= (BIT2|BIT3|BIT5|BIT6|BIT7);
     P3->OUT &= ~(BIT0);
